@@ -12,9 +12,16 @@ This is repository servers as my personal research [logs](logs.md) — a place t
 
 ```
 log/
+├──2025-9&10
+│   ├──2025-9&10-log.md
+└── assets/
+├──2025-11
+│   ├──2025--lo11g.md
+└── assets/
 ├── assets/
+├── .gitattributes
 ├── README.md
-├── logs.md
+├── overview.md
 └── papers.md
 ```
 
