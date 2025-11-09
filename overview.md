@@ -492,6 +492,13 @@ CLIP的ViT学习到了通用视觉概念等注意力模式，如物体的边缘�
 
 
 
+Transformer 本身并不要求 N 固定为某个值，它只要求：
+
+- 所有样本的 N 在同一个 batch 内相同；
+- 它会自动对序列的所有 token 做 self-attention。
+
+
+
 在图像编码器中，特征最终会被聚合在[cls]这一token中；而文本编码器中，特征会被聚合在[EOS]中
 
 训练过程，会有多个标签被嵌入[CLS]中，得到K个值，用其与真实标签的损失进行优化
@@ -933,6 +940,28 @@ PLOT：用于实现局部视觉特征与多个文本提示词的对齐，实现�
 PLOT计算方法相比余弦相似度使得推理速度有所下降，训练时间也有所延长
 
 仅针对few shot的方法起作用
+
+
+
+### TCP
+
+**TCP:Textual-based Class-aware Prompt tuning for Visual-Language Model**
+
+**KgCoOp上的改进**，还结合了PRO的一部分设计
+
+针对文本端，采用先验知识方法，设计了一个**TKE**模块，将文本知识映射到 class-aware prompts中，在将这些Prompt集成到文本编码器
+
+<img src="./assets/image-20251109195032103.png" alt="image-20251109195032103" style="zoom:67%;" />
+
+<img src="./assets/image-20251109194924873.png" alt="image-20251109194924873" style="zoom:67%;" />
+
+简单说就是：将手工设计文本和class 1.进行embedding和Prompt learner放在一起 2.在自己经过原文本编码器然后通过一个类似Adapter的模块，插入到可学习端中的中间层继续训练 3.最后再对两个端的输出进行对比损失
+
+<img src="./assets/image-20251109135124408.png" alt="image-20251109135124408" style="zoom: 80%;" />
+
+
+
+
 
 
 

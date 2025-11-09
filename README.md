@@ -16,7 +16,7 @@ log/
 │   ├──2025-9&10-log.md
 └── assets/
 ├──2025-11
-│   ├──2025--lo11g.md
+│   ├──2025-11-log.md
 └── assets/
 ├── assets/
 ├── .gitattributes
