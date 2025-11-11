@@ -492,6 +492,16 @@ CLIP的ViT学习到了通用视觉概念等注意力模式，如物体的边缘�
 
 
 
+**关于transformer的注意力机制**
+
+transformer模型由多个transformer层堆叠而成，每一层的输出都会对下一层的注意力机制产生影响。
+
+Prompt在进入transformer层后，在每个self-attention层都会让Prompt与class Prompt进行交互，从而改变class token的注意力分布 -> 改变下游层看到的上下文embedding -> 调整整个句子的语义
+
+在自注意机制中 QKV 都是从(prompt, class)线性映射出来的, class token的更新也依赖与Prompt token
+
+
+
 Transformer 本身并不要求 N 固定为某个值，它只要求：
 
 - 所有样本的 N 在同一个 batch 内相同；
