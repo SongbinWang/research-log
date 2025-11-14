@@ -607,14 +607,6 @@ CoOp和CoCoOp的训练策略
 
 
 
-build_dataloader
-
-
-
-build_model : 加载原始的CLIP以便做修改。基于原本的CLIP构建包含可学习Prompt的CLIP
-
-
-
 ### MaPLe
 
 **MaPLe: Multi-modal Prompt Learning**
@@ -909,13 +901,13 @@ LLM与CLIP的文本编码器的语言空间存在不匹配问题
 
 结合CLIP-Adapter，maple，PromptSRC，强化了正则效果
 
-对**可训练模型**和**预训练模型**的预测结果做一致性约束。两个组件：对扰动输入(即做数据增强)进行一致性约束；Adapter和Prompt两种方法的融合)
+对**可训练模型**和**预训练模型**的预测结果做一致性约束。两个组件：对扰动输入(即做数据增强)进行一致性约束；Adapter和Prompt两种方法的融合
 
 与KgCoOp的思路有相似之处，为了保证原有模型的泛化能力，对经过微调的输出和原本的输出做一致性约束
 
 涉及知识蒸馏概念，让预训练模型通过一致性约束，实现冻结编码器到可学习编码器的知识蒸馏
 
-文本分支，也利用LLM作为外部知识，让LLM对原有文本生成更加详细的描述，将其输出与可训练端进行一致性约束；图像分支，则通过图形增强，将其输出与可训练端进行一致性约束
+文本分支，也利用LLM作为外部知识，让LLM对原有文本生成更加详细的描述，将其输出与可训练端进行一致性约束。并且对于LLM输出语句的选择，具体实现**采用随机选择**，而不是加权集成；图像分支，则通过图形增强，将其输出与可训练端进行一致性约束
 
 <img src="./assets/image-20251024141414647.png" alt="image-20251024141414647" style="zoom:67%;" />
 
@@ -968,6 +960,34 @@ PLOT计算方法相比余弦相似度使得推理速度有所下降，训练时�
 简单说就是：将手工设计文本和class 1.进行embedding和Prompt learner放在一起 2.在自己经过原文本编码器然后通过一个类似Adapter的模块，插入到可学习端中的中间层继续训练 3.最后再对两个端的输出进行对比损失
 
 <img src="./assets/image-20251109135124408.png" alt="image-20251109135124408" style="zoom: 80%;" />
+
+消融实验：
+
+将TKE模块插入到现有主流方法中，性能都呈现提升
+
+随机初始化的性能在TCP中优于手工设计模版初始化
+
+在补充的实验部分，还探讨了在插入class-aware prompt时候权重w的大小设置，设置为1直接进行替换效果最优
+
+
+
+### BIP
+
+**Bi-modality Individual-aware Prompt tuning for Visual-Language Model.**
+
+在TCP的基础上为视觉端也加上视觉实例Prompt嵌入模块(VKE)。将文本单模态调优升级为双模态调优。
+
+<img src="./assets/image-20251114140257139.png" alt="image-20251114140257139" style="zoom:67%;" />
+
+文本端的插入与TCP保持一致；视觉端也类似，但是由于本身Prompt结构与文本不同，所以插入方式存在不同
+
+视觉端上还产生了一个交叉熵损失项
+
+在消融实验上做了相当多的分析：
+
+性能消耗：参数量大于PromptSRC但训练时间却比PromptSRC要少 **(可以对这部分进行解释)**
+
+感知Prompt替换的权重：文本端设置仍然为1(完全替换)；视觉端设置为0.75
 
 
 
@@ -1049,6 +1069,12 @@ linear probe和CLIP-Adapter的区别：前者为在输出端训练一个全连�
 
 
 
+**GFLOPs(Giga Floating Point Operations)**(模型在一次前向传播（或一次推理）中所需的浮点运算次数)：衡量模型的计算量（计算效率、复杂度）
+
+**HM(Harmonic Mean)**(调和平均)：衡量模型在多个任务或类别上的综合性能（通常用于评估平衡性）
+
+
+
 ​	CLIP本身训练时候，主要就是对文本进行了prompt ensembling, 来提高语义泛化性，而对图像却没有做过多增强
 
 ​	在文本分支，文本的信息丰富度远不如图像，因此大部分引入额外数据信息的工作都是在文本分支上进行的
@@ -1105,7 +1131,29 @@ epoch=3的图像编码器某个卷积层的权重参数：
 
 
 
+text encoder 的控制流
 
+<img src="./assets/image-20251113144543220.png" alt="image-20251113144543220" style="zoom:67%;" />
+
+`self.transformer = clip_model.transformer`  ->  `transformer([x, compound_prompts_deeper_text, 0, ])`
+
+<img src="./assets/image-20251113145115531.png" alt="image-20251113145115531" style="zoom:67%;" />
+
+`self.transformer` 构建部分
+
+<img src="./assets/image-20251113145343946.png" alt="image-20251113145343946" style="zoom:67%;" />
+
+`Transformer()`的 `forward()`返回值为`self.resblocks(x)`
+
+<img src="./assets/image-20251113145639984.png" alt="image-20251113145639984" style="zoom:67%;" />
+
+`ResidualAttentionBlock_MaPLe()` 的`forward()`和返回值
+
+
+
+构建函数 : `self.transformer = Transformer()` -> `self.resblocks = nn.Sequential( n * ResidualAttentionBlock_MaPLe())`  
+
+forward调用: `self.transformer([x, compound_prompts, 0])` -> `self.resblocks([x, compound_prompts, 0])`
 
 
 

@@ -105,6 +105,8 @@
 [[Paper](https://arxiv.org/abs/2412.08176)] [[Code](https://github.com/xjjxmu/TextRefiner)]
 - `TCP` **TCP: Textual-based Class-aware Prompt tuning for Visual-Language Model.** CVPR 2024.
 [[Paper](https://arxiv.org/abs/2311.18231)] [[Code](https://github.com/htyao89/Textual-based_Class-aware_prompt_tuning)]
+- `BIP` **Bi-modality Individual-aware Prompt tuning for Visual-Language Model.** TPAMI 2025.
+  [[Paper](https://ieeexplore.ieee.org/abstract/document/10949734)] [[Code](https://github.com/htyao89/BIP)] 
 
 
 
